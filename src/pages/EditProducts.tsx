@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 export default function EditProducts() {
   const [search, setSearch] = useState('');
   const [showOnlyModified, setShowOnlyModified] = useState(false);
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const { products, setProducts } = useProductContext();
   const navigate = useNavigate();
 
@@ -34,8 +36,18 @@ export default function EditProducts() {
         setSearch={setSearch}
         showOnlyModified={showOnlyModified}
         setShowOnlyModified={setShowOnlyModified}
+        products={products}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        setMinPrice={setMinPrice}
+        setMaxPrice={setMaxPrice}
       />
-      <ProductTable search={search} showOnlyModified={showOnlyModified} />
+      <ProductTable
+        search={search}
+        showOnlyModified={showOnlyModified}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+      />
 
       <Box display="flex" justifyContent="space-between" mt={2}>
         <Button variant="outlined" color="secondary" onClick={handleRestorePrices}>

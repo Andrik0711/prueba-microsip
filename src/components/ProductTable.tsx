@@ -2,31 +2,19 @@ import {
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
   TextField, Paper, Typography
 } from '@mui/material';
-import { Product } from '../types/Product';
+// import { Product } from '../types/Product';
 import { useProductContext } from '../context/ProductContext';
-import { useState, useMemo } from 'react';
+// import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 type Props = {
   search: string;
   showOnlyModified: boolean;
+  minPrice: number | null;
+  maxPrice: number | null;
 };
 
-export default function ProductTable({ search, showOnlyModified }: Props) {
+export default function ProductTable({ search, showOnlyModified, minPrice, maxPrice }: Props) {
   const { products, setProducts } = useProductContext();
-
-  // Nuevo estado para el filtro de rango de precio actual
-  const [minPrice, setMinPrice] = useState<number | null>(null);
-  const [maxPrice, setMaxPrice] = useState<number | null>(null);
-
-  // Calcular el rango real de precios actuales en los productos
-  const priceRange = useMemo(() => {
-    if (products.length === 0) return { min: 0, max: 0 };
-    const precios = products.map((p) => p.precio_actual);
-    return {
-      min: Math.min(...precios),
-      max: Math.max(...precios),
-    };
-  }, [products]);
 
   const handleChange = (key_unique: string, field: 'precio_actual' | 'inventario_actual', value: string) => {
     const newProducts = products.map((p) => {
@@ -49,35 +37,13 @@ export default function ProductTable({ search, showOnlyModified }: Props) {
       p.nombre.toLowerCase().includes(search.toLowerCase()) ||
       p.clave.toLowerCase().includes(search.toLowerCase());
     const matchModified = !showOnlyModified || p.modificado;
-    const matchMin = minPrice === null || p.precio_actual >= minPrice;
-    const matchMax = maxPrice === null || p.precio_actual <= maxPrice;
+    const matchMin = minPrice === null ? true : p.precio_actual >= minPrice;
+    const matchMax = maxPrice === null ? true : p.precio_actual <= maxPrice;
     return matchSearch && matchModified && matchMin && matchMax;
   });
 
   return (
     <>
-      {/* Filtro de rango de precio actual */}
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16 }}>
-        <Typography variant="body2">Filtrar por precio actual:</Typography>
-        <TextField
-          label={`Mín ($${priceRange.min.toLocaleString('es-MX', { minimumFractionDigits: 2 })})`}
-          type="number"
-          size="small"
-          value={minPrice ?? ''}
-          onChange={e => setMinPrice(e.target.value === '' ? null : Number(e.target.value))}
-          inputProps={{ min: priceRange.min, max: priceRange.max, step: '0.01' }}
-          sx={{ width: 120 }}
-        />
-        <TextField
-          label={`Máx ($${priceRange.max.toLocaleString('es-MX', { minimumFractionDigits: 2 })})`}
-          type="number"
-          size="small"
-          value={maxPrice ?? ''}
-          onChange={e => setMaxPrice(e.target.value === '' ? null : Number(e.target.value))}
-          inputProps={{ min: priceRange.min, max: priceRange.max, step: '0.01' }}
-          sx={{ width: 120 }}
-        />
-      </div>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
