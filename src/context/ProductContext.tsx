@@ -1,7 +1,7 @@
 // src/context/ProductContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Product } from '../types/Product';
-import { fetchProducts } from '../api/kladiApi';
+import { fetchProducts } from '../api/KladiApi.ts';
 
 interface ProductContextType {
   products: Product[];
@@ -25,7 +25,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
         // Generamos un key único para cada producto
         key_unique: randomInt(1, 1000000).toString(),
         id: p.id,
-        nombre: p.nombre,
+        nombre: decodeLatin1(p.nombre),
         clave: p.clave,
         unidad_medida: '', 
         precio_sugerido: p.precio_sugerido,
@@ -51,6 +51,16 @@ export const useProductContext = () => {
   if (!context) throw new Error('useProductContext must be used within a ProductProvider');
   return context;
 };
+
+// Decodifica cadenas mal interpretadas como Latin1 que vienen desde el api
+function decodeLatin1(str: string): string {
+  try {
+    return decodeURIComponent(escape(str));
+  } catch {
+    return str;
+  }
+}
+
 
 
 function randomInt(min: number, max: number): number {
