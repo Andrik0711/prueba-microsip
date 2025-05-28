@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Product } from '../types/Product';
 import { fetchProducts } from '../api/KladiApi.ts';
+import { cleanAndDecode, randomInt } from '../utils/productUtils';
 
 interface ProductContextType {
   products: Product[];
@@ -67,17 +68,4 @@ export const useProductContext = () => {
   return context;
 };
 
-// Limpia el prefijo 'val::' y decodifica caracteres mal codificados
-function cleanAndDecode(str: string): string {
-  if (!str) return '';
-  const cleaned = str.startsWith('val::') ? str.slice(5) : str;
-  try {
-    return decodeURIComponent(escape(cleaned));
-  } catch {
-    return cleaned;
-  }
-}
-
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+// Elimino las funciones auxiliares locales, ya que ahora están en utils/productUtils.ts
