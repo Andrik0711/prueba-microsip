@@ -21,20 +21,35 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
 
     fetchProducts().then((response: FetchProductsResponse) => {
       const items = response.__ITEMS__ || [];
-      const formatted = items.map((p: Product) => ({
-        // Generamos un key único para cada producto
-        key_unique: randomInt(1, 1000000).toString(),
-        id: p.id,
-        nombre: cleanAndDecode(p.nombre),
-        clave: p.clave,
-        unidad_medida: '', 
-        precio_sugerido: p.precio_sugerido,
-        precio_actual: p.precio_actual,
-        inventario_actual: 0,
-        inventario_original: 0,
-        categoria: '', 
-        modificado: false,
-      }));
+      // Usamos unknown y lo casteamos para evitar 'any' y cumplir con las reglas de TypeScript
+      const formatted = items.map((item: object) => {
+        const p = item as { [key: string]: unknown };
+        // Utilidades para extraer string seguro
+        const getString = (v: unknown): string => typeof v === 'string' ? v : '';
+        const getFirstClave = (v: unknown): string => Array.isArray(v) && v[0] && typeof v[0].clave === 'string' ? v[0].clave : '';
+        // Extrae el nombre de la categoría sin usar 'any'
+        const getCategoria = (v: unknown): string => {
+          if (v && typeof v === 'object' && 'nombre' in v) {
+            const nombre = (v as { nombre?: unknown }).nombre;
+            return typeof nombre === 'string' ? nombre : '';
+          }
+          return '';
+        };
+        return {
+          // Generamos un key único para cada producto
+          key_unique: randomInt(1, 1000000).toString(),
+          id: getString(p.id) || getString(p.ID),
+          nombre: cleanAndDecode(getString(p.nombre) || getString(p.NOMBRE)),
+          clave: getString(p.clave) || getFirstClave(p.claves),
+          unidad_medida: getString(p.unidad_medida) || getString(p.unidadMedida),
+          precio_sugerido: parseFloat(cleanAndDecode(getString(p.precio_sugerido) || getString(p.precioSugerido) || '0')),
+          precio_actual: parseFloat(cleanAndDecode(getString(p.precio_actual) || getString(p.precioActual) || getString(p.precio_sugerido) || getString(p.precioSugerido) || '0')),
+          inventario_actual: 0,
+          inventario_original: 0,
+          categoria: getString(p.categoria) || getCategoria(p.CATALOGO),
+          modificado: false,
+        };
+      });
       setProducts(formatted);
     });
   }, []);
