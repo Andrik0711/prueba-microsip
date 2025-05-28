@@ -27,7 +27,6 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
         const p = item as { [key: string]: unknown };
         // Utilidades para extraer string seguro
         const getString = (v: unknown): string => typeof v === 'string' ? v : '';
-        const getFirstClave = (v: unknown): string => Array.isArray(v) && v[0] && typeof v[0].clave === 'string' ? v[0].clave : '';
         // Extrae el nombre de la categoría sin usar 'any'
         const getCategoria = (v: unknown): string => {
           if (v && typeof v === 'object' && 'nombre' in v) {
@@ -47,18 +46,51 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
           }
           return 0;
         };
+        // Utilidad para extraer marca
+        const getMarca = (v: unknown): string => {
+          if (typeof v === 'string') return v;
+          if (v && typeof v === 'object' && 'nombre' in v) {
+            const nombre = (v as { nombre?: unknown }).nombre;
+            return typeof nombre === 'string' ? nombre : '';
+          }
+          return '';
+        };
+        // Type guard para objetos con propiedad nombre
+        function hasNombre(obj: unknown): obj is { nombre: string } {
+          return typeof obj === 'object' && obj !== null && 'nombre' in obj && typeof (obj as { nombre: unknown }).nombre === 'string';
+        }
+        // Utilidad para extraer categoría robusta
+        const getCategoriaRobusta = (p: Record<string, unknown>): string => {
+          if (typeof p.categoria === 'string' && p.categoria.trim()) return p.categoria;
+          if (hasNombre(p.catalogo)) return p.catalogo.nombre;
+          if (hasNombre(p.CATALOGO)) return p.CATALOGO.nombre;
+          if (typeof p.catalogo === 'string' && p.catalogo.trim()) return p.catalogo;
+          if (typeof p.CATALOGO === 'string' && p.CATALOGO.trim()) return p.CATALOGO;
+          return 'SIN CATEGORÍA';
+        };
+        // Utilidad para extraer marca robusta
+        const getMarcaRobusta = (p: Record<string, unknown>): string => {
+          if (typeof p.marca === 'string' && p.marca.trim()) return p.marca;
+          if (hasNombre(p.marca)) return p.marca.nombre;
+          if (hasNombre(p.MARCA)) return p.MARCA.nombre;
+          if (typeof p.MARCA === 'string' && p.MARCA.trim()) return p.MARCA;
+          return 'SIN MARCA';
+        };
         return {
           // Generamos un key único para cada producto
           key_unique: randomInt(1, 1000000).toString(),
-          id: getString(p.id) || getString(p.ID),
+          id: (typeof p.ID === 'number' || typeof p.ID === 'string') ? p.ID.toString() : (typeof p.id === 'number' || typeof p.id === 'string') ? p.id.toString() : '',
           nombre: cleanAndDecode(getString(p.nombre) || getString(p.NOMBRE)),
-          clave: getString(p.clave) || getFirstClave(p.claves),
+          clave: getString(p.clave), // Solo campo directo
           unidad_medida: getString(p.unidad_medida) || getString(p.unidadMedida),
           precio_sugerido: getNumber(p.precio_sugerido, p.precioSugerido, p.PRECIO_SUGERIDO),
           precio_actual: getNumber(p.precio_actual, p.precioActual, p.precio_sugerido, p.precioSugerido, p.PRECIO_SUGERIDO),
           inventario_actual: 0,
           inventario_original: 0,
-          categoria: getString(p.categoria) || getCategoria(p.CATALOGO),
+          categoria: getCategoriaRobusta(p),
+          marca: getMarcaRobusta(p),
+          CATALOGO: p.CATALOGO && typeof p.CATALOGO === 'object' ? { nombre: getCategoria(p.CATALOGO) } : undefined,
+          MARCA: p.MARCA && typeof p.MARCA === 'object' ? { nombre: getMarca(p.MARCA) } : undefined,
           modificado: false,
         };
       });

@@ -1,11 +1,10 @@
 import {
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
-  TextField, Paper, Typography, TablePagination, TableSortLabel
+  TextField, Paper, Typography, TablePagination, TableSortLabel, Checkbox, Chip, Tooltip, Box, Button, MenuItem, Select, FormControl, InputLabel
 } from '@mui/material';
-// import { Product } from '../types/Product';
+import EditIcon from '@mui/icons-material/Edit';
 import { useProductContext } from '../context/ProductContext';
-import { useState } from 'react';
-// import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import { useState, useMemo } from 'react';
 
 type Props = {
   search: string;
@@ -22,10 +21,38 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
   const rowsPerPage = 4;
 
   // Estado de ordenamiento
-  const [orderBy, setOrderBy] = useState<'nombre' | 'precio_sugerido' | 'precio_actual' | 'inventario_actual'>('nombre');
+  const [orderBy, setOrderBy] = useState<'nombre' | 'precio_sugerido' | 'precio_actual' | 'inventario_actual' | 'categoria' | 'marca'>('nombre');
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
 
-  const handleSort = (property: 'nombre' | 'precio_sugerido' | 'precio_actual' | 'inventario_actual') => {
+  // Filtro de categoría y marca (case-insensitive, soporta distintos campos)
+  const categorias = useMemo(() => {
+    const set = new Set(products.map(p => (p.categoria || p.CATALOGO?.nombre || 'SIN CATEGORÍA').toString().toUpperCase()));
+    return Array.from(set).sort();
+  }, [products]);
+  const marcas = useMemo(() => {
+    const set = new Set(products.map(p => (p.marca || p.MARCA?.nombre || 'SIN MARCA').toString().toUpperCase()));
+    return Array.from(set).sort();
+  }, [products]);
+  const [categoriaFiltro, setCategoriaFiltro] = useState<string>('');
+  const [marcaFiltro, setMarcaFiltro] = useState<string>('');
+
+  // Selección para edición por grupo
+  const [selected, setSelected] = useState<string[]>([]);
+  const handleSelectRow = (key: string) => {
+    setSelected(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  };
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) setSelected(paginated.map(p => p.key_unique));
+    else setSelected([]);
+  };
+
+  // Edición masiva ejemplo: poner inventario a 0
+  const handleGroupSetInventarioCero = () => {
+    setProducts(products.map(p => selected.includes(p.key_unique) ? { ...p, inventario_actual: 0, modificado: true } : p));
+    setSelected([]);
+  };
+
+  const handleSort = (property: 'nombre' | 'precio_sugerido' | 'precio_actual' | 'inventario_actual' | 'categoria' | 'marca') => {
     if (orderBy === property) {
       setOrder(order === 'asc' ? 'desc' : 'asc');
     } else {
@@ -62,7 +89,11 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
     const matchModified = !showOnlyModified || p.modificado;
     const matchMin = minPrice === null ? true : p.precio_actual >= minPrice;
     const matchMax = maxPrice === null ? true : p.precio_actual <= maxPrice;
-    return matchSearch && matchModified && matchMin && matchMax;
+    const categoriaValue = (p.categoria || p.CATALOGO?.nombre || 'SIN CATEGORÍA').toString().toUpperCase();
+    const marcaValue = (p.marca || p.MARCA?.nombre || 'SIN MARCA').toString().toUpperCase();
+    const matchCategoria = categoriaFiltro === '' || categoriaValue === categoriaFiltro;
+    const matchMarca = marcaFiltro === '' || marcaValue === marcaFiltro;
+    return matchSearch && matchModified && matchMin && matchMax && matchCategoria && matchMarca;
   });
 
   // Ordenar los productos filtrados
@@ -76,6 +107,14 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
       cmp = a.precio_actual - b.precio_actual;
     } else if (orderBy === 'inventario_actual') {
       cmp = a.inventario_actual - b.inventario_actual;
+    } else if (orderBy === 'categoria') {
+      const aCat = (a.categoria || a.CATALOGO?.nombre || '').toString().toUpperCase();
+      const bCat = (b.categoria || b.CATALOGO?.nombre || '').toString().toUpperCase();
+      cmp = aCat.localeCompare(bCat);
+    } else if (orderBy === 'marca') {
+      const aMarca = (a.marca || a.MARCA?.nombre || '').toString().toUpperCase();
+      const bMarca = (b.marca || b.MARCA?.nombre || '').toString().toUpperCase();
+      cmp = aMarca.localeCompare(bMarca);
     }
     return order === 'asc' ? cmp : -cmp;
   });
@@ -85,10 +124,52 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
 
   return (
     <>
+      {/* Filtros de categoría y marca */}
+      <Box mb={2} display="flex" alignItems="center" gap={2}>
+        <FormControl size="small" sx={{ minWidth: 180 }}>
+          <InputLabel>Categoría</InputLabel>
+          <Select
+            value={categoriaFiltro}
+            label="Categoría"
+            onChange={e => setCategoriaFiltro(e.target.value)}
+          >
+            <MenuItem value="">Todas</MenuItem>
+            {categorias.map(cat => (
+              <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl size="small" sx={{ minWidth: 180 }}>
+          <InputLabel>Marca</InputLabel>
+          <Select
+            value={marcaFiltro}
+            label="Marca"
+            onChange={e => setMarcaFiltro(e.target.value)}
+          >
+            <MenuItem value="">Todas</MenuItem>
+            {marcas.map(marca => (
+              <MenuItem key={marca} value={marca}>{marca}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        {selected.length > 0 && (
+          <Button size="small" variant="outlined" color="primary" onClick={handleGroupSetInventarioCero}>
+            Inventario a 0 ({selected.length})
+          </Button>
+        )}
+      </Box>
       <TableContainer component={Paper}>
         <Table size="medium" stickyHeader>
           <TableHead>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={selected.length > 0 && selected.length < paginated.length}
+                  checked={paginated.length > 0 && selected.length === paginated.length}
+                  onChange={e => handleSelectAll(e.target.checked)}
+                  inputProps={{ 'aria-label': 'Seleccionar todos' }}
+                />
+              </TableCell>
               <TableCell sortDirection={orderBy === 'nombre' ? order : false}>
                 <TableSortLabel
                   active={orderBy === 'nombre'}
@@ -96,6 +177,24 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
                   onClick={() => handleSort('nombre')}
                 >
                   Nombre
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sortDirection={orderBy === 'categoria' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'categoria'}
+                  direction={orderBy === 'categoria' ? order : 'asc'}
+                  onClick={() => handleSort('categoria')}
+                >
+                  Categoría
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sortDirection={orderBy === 'marca' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'marca'}
+                  direction={orderBy === 'marca' ? order : 'asc'}
+                  onClick={() => handleSort('marca')}
+                >
+                  Marca
                 </TableSortLabel>
               </TableCell>
               <TableCell sortDirection={orderBy === 'precio_sugerido' ? order : false}>
@@ -125,57 +224,82 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
                   Inventario
                 </TableSortLabel>
               </TableCell>
+              <TableCell align="center">Editado</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginated.map((p) => (
-              <TableRow key={p.key_unique}>
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight="bold">
-                    {p.nombre.toUpperCase()}
-                  </Typography>
-                  <Typography variant="caption">{p.unidad_medida ? p.unidad_medida.toUpperCase() : ''}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {p.clave ? p.clave.toUpperCase() : ''}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" fontWeight="bold">
-                    {`$${Number(p.precio_sugerido).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <TextField
-                    label="Precio actual"
-                    type="number"
-                    variant="outlined"
-                    size="small"
-                    value={p.precio_actual}
-                    onChange={(e) => handleChange(p.key_unique, 'precio_actual', e.target.value)}
-                    inputProps={{
-                      step: '0.01', min: 0, style: { textAlign: 'right' }, pattern: '[0-9]+([.][0-9]+)?'
-                    }}
-                    InputProps={{
-                      startAdornment: <span style={{ marginRight: 4 }}>$</span>,
-                    }}
-                    sx={{ width: 140 }}
-                    fullWidth
-                  />
-                </TableCell>
-                <TableCell>
-                  <TextField
-                    type="number"
-                    variant="outlined"
-                    size="small"
-                    value={p.inventario_actual}
-                    onChange={(e) => handleChange(p.key_unique, 'inventario_actual', e.target.value)}
-                    inputProps={{
-                      step: '0.01', min: 0, pattern: '[0-9]+([.][0-9]+)?'
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+            {paginated.map((p) => {
+              const categoriaValue = (p.categoria || p.CATALOGO?.nombre || 'SIN CATEGORÍA').toString().toUpperCase();
+              const marcaValue = (p.marca || p.MARCA?.nombre || 'SIN MARCA').toString().toUpperCase();
+              return (
+                <TableRow key={p.key_unique} selected={selected.includes(p.key_unique)}>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selected.includes(p.key_unique)}
+                      onChange={() => handleSelectRow(p.key_unique)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle2" fontWeight="bold">
+                      {p.nombre.toUpperCase()}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      ID: {p.id ? p.id : ''}
+                    </Typography>
+                    <Typography variant="caption">{p.unidad_medida ? p.unidad_medida.toUpperCase() : ''}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {p.clave ? p.clave.toUpperCase() : ''}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={categoriaValue} size="small" />
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={marcaValue} size="small" color={marcaValue !== 'SIN MARCA' ? 'default' : 'warning'} />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight="bold">
+                      {`$${Number(p.precio_sugerido).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      label="Precio actual"
+                      type="number"
+                      variant="outlined"
+                      size="small"
+                      value={p.precio_actual}
+                      onChange={(e) => handleChange(p.key_unique, 'precio_actual', e.target.value)}
+                      inputProps={{
+                        step: '0.01', min: 0, style: { textAlign: 'right' }, pattern: '[0-9]+([.][0-9]+)?'
+                      }}
+                      InputProps={{
+                        startAdornment: <span style={{ marginRight: 4 }}>$</span>,
+                      }}
+                      sx={{ width: 140 }}
+                      fullWidth
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      type="number"
+                      variant="outlined"
+                      size="small"
+                      value={p.inventario_actual}
+                      onChange={(e) => handleChange(p.key_unique, 'inventario_actual', e.target.value)}
+                      inputProps={{
+                        step: '0.01', min: 0, pattern: '[0-9]+([.][0-9]+)?'
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    {p.modificado && (
+                      <Tooltip title="Artículo editado"><EditIcon color="primary" fontSize="small" /></Tooltip>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
         <TablePagination
