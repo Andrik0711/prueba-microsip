@@ -43,7 +43,8 @@ export default function ProductTable({ search, showOnlyModified }: Props) {
         <TableHead>
           <TableRow>
             <TableCell>Nombre</TableCell>
-            <TableCell>Precio</TableCell>
+            <TableCell>Precio sugerido</TableCell>
+            <TableCell>Precio actual</TableCell>
             <TableCell>Inventario</TableCell>
           </TableRow>
         </TableHead>
@@ -57,12 +58,26 @@ export default function ProductTable({ search, showOnlyModified }: Props) {
                 <Typography variant="caption">{p.unidad_medida}</Typography>
               </TableCell>
               <TableCell>
+                <Typography variant="body2" fontWeight="bold">
+                  {`$${Number(p.precio_sugerido).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                </Typography>
+              </TableCell>
+              <TableCell>
                 <TextField
+                  label="Precio actual"
                   type="number"
                   variant="outlined"
                   size="small"
                   value={p.precio_actual}
                   onChange={(e) => handleChange(p.key_unique, 'precio_actual', e.target.value)}
+                  inputProps={{
+                    step: '0.01', min: 0, style: { textAlign: 'right' }
+                  }}
+                  InputProps={{
+                    startAdornment: <span style={{ marginRight: 4 }}>$</span>,
+                  }}
+                  sx={{ width: 140 }}
+                  fullWidth
                 />
               </TableCell>
               <TableCell>
@@ -74,7 +89,6 @@ export default function ProductTable({ search, showOnlyModified }: Props) {
                   onChange={(e) => handleChange(p.key_unique, 'inventario_actual', e.target.value)}
                 />
               </TableCell>
-              <TableCell>{p.unidad_medida}</TableCell>
             </TableRow>
           ))}
         </TableBody>
