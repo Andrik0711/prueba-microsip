@@ -45,7 +45,6 @@ export default function ProductTable({ search, showOnlyModified }: Props) {
             <TableCell>Nombre</TableCell>
             <TableCell>Precio</TableCell>
             <TableCell>Inventario</TableCell>
-            <TableCell>Unidad</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

@@ -36,6 +36,17 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
           }
           return '';
         };
+        // Utilidad para extraer y limpiar un número seguro
+        const getNumber = (...args: unknown[]): number => {
+          for (const v of args) {
+            const s = getString(v);
+            if (s) {
+              const n = parseFloat(cleanAndDecode(s));
+              if (!isNaN(n)) return n;
+            }
+          }
+          return 0;
+        };
         return {
           // Generamos un key único para cada producto
           key_unique: randomInt(1, 1000000).toString(),
@@ -43,8 +54,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
           nombre: cleanAndDecode(getString(p.nombre) || getString(p.NOMBRE)),
           clave: getString(p.clave) || getFirstClave(p.claves),
           unidad_medida: getString(p.unidad_medida) || getString(p.unidadMedida),
-          precio_sugerido: parseFloat(cleanAndDecode(getString(p.precio_sugerido) || getString(p.precioSugerido) || '0')),
-          precio_actual: parseFloat(cleanAndDecode(getString(p.precio_actual) || getString(p.precioActual) || getString(p.precio_sugerido) || getString(p.precioSugerido) || '0')),
+          precio_sugerido: getNumber(p.precio_sugerido, p.precioSugerido, p.PRECIO_SUGERIDO),
+          precio_actual: getNumber(p.precio_actual, p.precioActual, p.precio_sugerido, p.precioSugerido, p.PRECIO_SUGERIDO),
           inventario_actual: 0,
           inventario_original: 0,
           categoria: getString(p.categoria) || getCategoria(p.CATALOGO),
@@ -67,5 +78,3 @@ export const useProductContext = () => {
   if (!context) throw new Error('useProductContext must be used within a ProductProvider');
   return context;
 };
-
-// Elimino las funciones auxiliares locales, ya que ahora están en utils/productUtils.ts
