@@ -13,9 +13,9 @@ type Props = {
 export default function ProductTable({ search, showOnlyModified }: Props) {
   const { products, setProducts } = useProductContext();
 
-  const handleChange = (id: string, field: 'precio_actual' | 'inventario_actual', value: string) => {
+  const handleChange = (key_unique: string, field: 'precio_actual' | 'inventario_actual', value: string) => {
     const newProducts = products.map((p) => {
-      if (p.id === id) {
+      if (p.key_unique === key_unique) {
         const updated = {
           ...p,
           [field]: parseFloat(value) || 0,
@@ -50,7 +50,7 @@ export default function ProductTable({ search, showOnlyModified }: Props) {
         </TableHead>
         <TableBody>
           {filtered.map((p) => (
-            <TableRow key={p.id}>
+            <TableRow key={p.key_unique}>
               <TableCell>
                 <Typography variant="subtitle2" fontWeight="bold">
                   {p.nombre}
@@ -63,7 +63,7 @@ export default function ProductTable({ search, showOnlyModified }: Props) {
                   variant="outlined"
                   size="small"
                   value={p.precio_actual}
-                  onChange={(e) => handleChange(p.id, 'precio_actual', e.target.value)}
+                  onChange={(e) => handleChange(p.key_unique, 'precio_actual', e.target.value)}
                 />
               </TableCell>
               <TableCell>
@@ -72,7 +72,7 @@ export default function ProductTable({ search, showOnlyModified }: Props) {
                   variant="outlined"
                   size="small"
                   value={p.inventario_actual}
-                  onChange={(e) => handleChange(p.id, 'inventario_actual', e.target.value)}
+                  onChange={(e) => handleChange(p.key_unique, 'inventario_actual', e.target.value)}
                 />
               </TableCell>
               <TableCell>{p.unidad_medida}</TableCell>
