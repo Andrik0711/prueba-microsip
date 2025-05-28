@@ -52,3 +52,49 @@ export default tseslint.config({
   },
 })
 ```
+# 🛠️ Kladi Ferretería - Gestión de Catálogo Inicial
+
+Aplicación web construida para clientes de **Kladi**, que permite a una ferretería revisar un catálogo precargado de productos, editar precios e inventario inicial, y confirmar los artículos que manejará en su tienda.
+
+## ✨ Funcionalidades principales
+
+- Visualización de catálogo con campos editables (precio e inventario)
+- Filtros por nombre, rango de precio y estado de inventario
+- Restauración de precios sugeridos
+- Detección de productos modificados
+- Pantalla de resumen y confirmación antes de guardar
+
+---
+
+## 🧑‍💻 Tecnologías utilizadas
+
+- ⚛️ React + TypeScript
+- 🎨 Material UI (MUI)
+- 🌐 Axios (para consumo de API externa)
+- 📦 Vite (entorno de desarrollo)
+- 🧠 React Context API (para estado global)
+- 🧪 (Opcional) ESLint + Prettier
+
+---
+
+## 🚀 Instalación
+
+### 1. Clona el repositorio
+
+```bash
+git clone https://github.com/Andrik0711/prueba-microsip.git
+cd prueba-microsip
+
+### 2. Instala las dependencias
+
+```bash
+npm install
+```
+
+### 3. Inicia el servidor de desarrollo
+
+```bash
+npm run dev
+```
+### 4. Abre tu navegador
+Abre [http://localhost:5173](http://localhost:5173) para ver la aplicación en acción.
