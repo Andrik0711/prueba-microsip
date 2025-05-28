@@ -25,7 +25,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
         // Generamos un key único para cada producto
         key_unique: randomInt(1, 1000000).toString(),
         id: p.id,
-        nombre: decodeLatin1(p.nombre),
+        nombre: cleanAndDecode(p.nombre),
         clave: p.clave,
         unidad_medida: '', 
         precio_sugerido: p.precio_sugerido,
@@ -52,16 +52,16 @@ export const useProductContext = () => {
   return context;
 };
 
-// Decodifica cadenas mal interpretadas como Latin1 que vienen desde el api
-function decodeLatin1(str: string): string {
+// Limpia el prefijo 'val::' y decodifica caracteres mal codificados
+function cleanAndDecode(str: string): string {
+  if (!str) return '';
+  const cleaned = str.startsWith('val::') ? str.slice(5) : str;
   try {
-    return decodeURIComponent(escape(str));
+    return decodeURIComponent(escape(cleaned));
   } catch {
-    return str;
+    return cleaned;
   }
 }
-
-
 
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
