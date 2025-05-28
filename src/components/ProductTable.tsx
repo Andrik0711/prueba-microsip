@@ -1,9 +1,10 @@
 import {
   Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
-  TextField, Paper, Typography
+  TextField, Paper, Typography, TablePagination
 } from '@mui/material';
 // import { Product } from '../types/Product';
 import { useProductContext } from '../context/ProductContext';
+import { useState } from 'react';
 // import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 type Props = {
@@ -15,6 +16,14 @@ type Props = {
 
 export default function ProductTable({ search, showOnlyModified, minPrice, maxPrice }: Props) {
   const { products, setProducts } = useProductContext();
+
+  // Estado de paginación
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 4;
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
 
   const handleChange = (key_unique: string, field: 'precio_actual' | 'inventario_actual', value: string) => {
     const newProducts = products.map((p) => {
@@ -42,10 +51,13 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
     return matchSearch && matchModified && matchMin && matchMax;
   });
 
+  // Slice para paginación
+  const paginated = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   return (
     <>
       <TableContainer component={Paper}>
-        <Table>
+        <Table size="medium" stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell>Nombre</TableCell>
@@ -55,7 +67,7 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
             </TableRow>
           </TableHead>
           <TableBody>
-            {filtered.map((p) => (
+            {paginated.map((p) => (
               <TableRow key={p.key_unique}>
                 <TableCell>
                   <Typography variant="subtitle2" fontWeight="bold">
@@ -99,6 +111,14 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
             ))}
           </TableBody>
         </Table>
+        <TablePagination
+          component="div"
+          count={filtered.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[]}
+        />
       </TableContainer>
     </>
   );
