@@ -18,7 +18,7 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
 
   // Estado de paginación
   const [page, setPage] = useState(0);
-  const rowsPerPage = 4;
+  const rowsPerPage = 3;
 
   // Estado de ordenamiento
   const [orderBy, setOrderBy] = useState<'nombre' | 'precio_sugerido' | 'precio_actual' | 'inventario_actual' | 'categoria' | 'marca'>('nombre');
