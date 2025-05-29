@@ -1,6 +1,72 @@
 # 🛠️ Kladi Ferretería - Gestión de Catálogo Inicial
 
-Aplicación web construida para clientes de **Kladi**, que permite a una ferretería revisar un catálogo precargado de productos, editar precios e inventario inicial, y confirmar los artículos que manejará en su tienda.
+---
+
+## 🧱 FASE 1: ESTRUCTURA DEL PROYECTO
+
+### ✅ Tecnologías y herramientas sugeridas
+- **Frontend:** React + TypeScript
+- **Framework de UI:** Material UI
+- **Gestión de estado:** Context API
+- **Consumo de API:** Axios
+- **Routing:** React Router DOM
+- **Build:** Vite
+- **Formateo y Lint:** Prettier + ESLint
+
+**Extras (puntos extra):**
+<!-- - SSR con Next.js (si deseas subir nota) -->
+- Deploy en Netlify
+- Pruebas unitarias con Vitest o Jest
+
+---
+
+## 🧩 FASE 2: CONSUMO DE LA API
+- 🌐 API externa: Se consume el catálogo de productos desde una API abierta de Kladi.
+
+---
+
+## 🎨 FASE 3: UI DE VISUALIZACIÓN Y EDICIÓN
+
+### ✏️ Componentes clave
+- **ProductTable** con campos editables (precio e inventario)
+- **Filtros:** por texto, rango de precio, estado de inventario
+- **Botones:** restaurar precios, finalizar
+
+### 🧮 Lógica clave
+- Comparar `precio_actual !== precio_sugerido` o `inventario_actual !== inventario_original` para saber si fue modificado.
+- Campo editable con validación numérica.
+
+---
+
+## ✅ FASE 4: PANTALLA DE RESUMEN Y GUARDADO
+
+### 📋 Mostrar
+- Lista de productos modificados
+- Total de productos modificados
+- Suma del inventario
+
+### 🧩 Funcionalidad
+- Botón "Guardar cambios": muestra modal de éxito.
+- Botón "Regresar": vuelve a pantalla de edición.
+
+---
+
+## 🧪 FASE 5: MEJORAS Y ENVÍO
+
+### 🏅 Puntos extra
+- ✅ SSR con Next.js
+- ✅ Columna y filtro por categoría
+- ✅ Modificación por grupos
+- ✅ Marca visual de productos editados
+- ✅ Pruebas unitarias
+
+### 📤 Deploy y envío
+- Publicar en GitHub y desplegar en Netlify.
+- Incluir README con:
+  - Descripción
+  - Instrucciones de instalación
+  - Justificación de decisiones técnicas
+  - Capturas de pantalla
 
 ---
 
@@ -24,7 +90,7 @@ Aplicación web construida para clientes de **Kladi**, que permite a una ferrete
 - 🌐 [Axios](https://axios-http.com/) – Consumo de API externa
 - ⚡ [Vite](https://vitejs.dev/) – Entorno de desarrollo rápido
 - 🧠 **React Context API** – Para estado global
-- 🧪 ESLint + Prettier – Buenas prácticas de código (opcional)
+- 🧪 ESLint + Prettier – Buenas prácticas de código
 
 ---
 
@@ -102,7 +168,7 @@ npm run dev
 ## 📌 Consideraciones Técnicas
 
 - Se utiliza el API abierto de Kladi para poblar productos:  
-  https://catalogo-kladi.dev.rombo.microsipnube.com/api/productos
+  https://catalogo-kladi.dev.rombo.microsipnube.com
 
 - Los productos se enriquecen en frontend con campos auxiliares como `precio_actual`, `inventario_actual`, `inventario_original` y `modificado`.
 
@@ -121,7 +187,3 @@ Se recomienda realizar pruebas manuales del flujo completo:
 - Guardar cambios → verificar modal de éxito.
 
 ---
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT.
