@@ -69,9 +69,15 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
   const handleChange = (key_unique: string, field: 'precio_actual' | 'inventario_actual', value: string) => {
     const newProducts = products.map((p) => {
       if (p.key_unique === key_unique) {
+        let newValue: number;
+        if (field === 'inventario_actual') {
+          newValue = Math.max(0, Math.floor(Number(value)) || 0); // Solo enteros positivos
+        } else {
+          newValue = parseFloat(value) || 0;
+        }
         const updated = {
           ...p,
-          [field]: parseFloat(value) || 0,
+          [field]: newValue,
         };
         updated.modificado =
           updated.precio_actual !== updated.precio_sugerido || updated.inventario_actual !== updated.inventario_original;
@@ -288,7 +294,7 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
                       value={p.inventario_actual}
                       onChange={(e) => handleChange(p.key_unique, 'inventario_actual', e.target.value)}
                       inputProps={{
-                        step: '0.01', min: 0, pattern: '[0-9]+([.][0-9]+)?'
+                        step: '1', min: 0, pattern: '[0-9]*', inputMode: 'numeric', style: { textAlign: 'right' }
                       }}
                     />
                   </TableCell>

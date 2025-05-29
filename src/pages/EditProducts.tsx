@@ -17,7 +17,9 @@ export default function EditProducts() {
     const restored = products.map((p) => ({
       ...p,
       precio_actual: p.precio_sugerido,
-      modificado: p.inventario_actual !== p.inventario_original,
+      modificado:
+        p.precio_sugerido !== p.precio_actual ||
+        p.inventario_actual !== p.inventario_original,
     }));
     setProducts(restored);
   };

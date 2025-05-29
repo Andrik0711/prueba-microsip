@@ -85,7 +85,7 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
           unidad_medida: getString(p.unidad_medida) || getString(p.unidadMedida),
           precio_sugerido: getNumber(p.precio_sugerido, p.precioSugerido, p.PRECIO_SUGERIDO),
           precio_actual: getNumber(p.precio_actual, p.precioActual, p.precio_sugerido, p.precioSugerido, p.PRECIO_SUGERIDO),
-          inventario_actual: 0,
+          inventario_actual: 0, // Siempre entero
           inventario_original: 0,
           categoria: getCategoriaRobusta(p),
           marca: getMarcaRobusta(p),
