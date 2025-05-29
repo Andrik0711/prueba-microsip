@@ -101,6 +101,10 @@ kladi-ferreteria/
 ├── public/
 │   └── index.html
 ├── src/
+│   ├── __tests__/
+│   │   ├── ProductTable.test.tsx  # Pruebas unitarias de la tabla
+│   │   ├── ProductFilters.test.tsx # Pruebas unitarias de filtros
+│   │   └── SummaryModal.test.tsx   # Pruebas unitarias del modal
 │   ├── api/
 │   │   └── kladiApi.ts         # Cliente Axios para API de Kladi
 │   ├── components/
@@ -178,12 +182,15 @@ npm run dev
 
 ## 🧪 Pruebas
 
-Actualmente, no se han implementado pruebas automatizadas.  
-Se recomienda realizar pruebas manuales del flujo completo:
+El proyecto incluye pruebas unitarias automáticas usando [Vitest](https://vitest.dev/) y [Testing Library](https://testing-library.com/).
 
-- Editar precios e inventario.
-- Activar filtro “solo modificados”.
-- Finalizar → revisar resumen.
-- Guardar cambios → verificar modal de éxito.
+### Ejecutar pruebas
+
+```bash
+npm run test         # Ejecuta todas las pruebas en modo consola
+npm run test:ui      # Ejecuta las pruebas en modo interactivo (UI)
+```
+
+Los archivos de prueba se encuentran en `src/__tests__/` para mantener una arquitectura limpia y escalable.
 
 ---
