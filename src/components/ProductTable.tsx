@@ -252,7 +252,11 @@ export default function ProductTable({ search, showOnlyModified, minPrice, maxPr
                     <Typography variant="caption" color="text.secondary">
                       ID: {p.id ? p.id : ''}
                     </Typography>
-                    <Typography variant="caption">{p.unidad_medida ? p.unidad_medida.toUpperCase() : ''}</Typography>
+                    {p.unidad_medida && (
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: 13, fontWeight: 500 }}>
+                        {p.unidad_medida.toUpperCase()}
+                      </Typography>
+                    )}
                     <Typography variant="caption" color="text.secondary">
                       {p.clave ? p.clave.toUpperCase() : ''}
                     </Typography>
